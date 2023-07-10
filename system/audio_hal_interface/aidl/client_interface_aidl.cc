@@ -91,13 +91,12 @@ BluetoothAudioClientInterface::GetAudioCapabilities(SessionType session_type) {
 }
 
 void BluetoothAudioClientInterface::FetchAudioProvider() {
+  if (!is_aidl_available()) {
+    LOG(ERROR) << __func__ << ": aidl is not supported on this platform.";
+    return;
+  }
   if (provider_ != nullptr) {
     LOG(WARNING) << __func__ << ": refetch";
-  } else if (!is_aidl_available()) {
-    // AIDL availability should only be checked at the beginning.
-    // When refetching, AIDL may not be ready *yet* but it's expected to be
-    // available later.
-    return;
   }
   auto provider_factory = IBluetoothAudioProviderFactory::fromBinder(
       ::ndk::SpAIBinder(AServiceManager_getService(
